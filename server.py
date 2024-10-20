@@ -1,12 +1,15 @@
-from bson import json_util
+from bson import json_util, ObjectId
 import json
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from dotenv import load_dotenv
 import os
 
 app = Flask(__name__)
+CORS(app)
+
 
 load_dotenv()
 
@@ -145,6 +148,42 @@ def get_services():
         return jsonify({
             "success": True,
             "data": json.loads(json_util.dumps(services))
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"An error occurred: {str(e)}"
+        }), 500
+
+
+@app.route('/client_service_details', methods=['GET'])
+def get_client_service_details():
+    data = request.json
+    client_id = data.get('clientid')
+    if not client_id:
+        return jsonify({"success": False, "message": "Missing client ID"}), 400
+
+    try:
+        client_services_collection = db['Keys']
+        services_collection = db['Services']
+
+        # Fetch service IDs for the client
+        client_services = list(client_services_collection.find({"walletid": client_id}, {"serviceid": 1}))
+        service_ids = [service['serviceid'] for service in client_services]
+
+        # Fetch service details
+        services = list(services_collection.find({"_id": {"$in": [ObjectId(sid) for sid in service_ids]}}))
+
+        # Convert ObjectId to string for JSON serialization
+        for service in services:
+            service['_id'] = str(service['_id'])
+
+        return jsonify({
+            "success": True,
+            "data": {
+                "clientId": client_id,
+                "services": services
+            }
         }), 200
     except Exception as e:
         return jsonify({
