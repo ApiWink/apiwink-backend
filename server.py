@@ -231,8 +231,12 @@ def create_service():
         "version": version
     }
 
-    print("###")
-    print(service_object)
+    # print("###")
+    # print(service_object)
+    wallet_address = None
+    user = db.User.find_one({"name": company_name})
+    if user:
+        wallet_address = user.get('wallet_address')
 
     # Insert into Services collection
     collection = db['Services']
@@ -242,11 +246,13 @@ def create_service():
         return jsonify({
             "success": True,
             "message": "Service created successfully",
-            "service_id": str(result.inserted_id)
+            "service_id": str(result.inserted_id),
+            "wallet_address": wallet_address
         })
     return jsonify({
         "success": False,
-        "message": "Failed to create service"
+        "message": "Failed to create service",
+        "wallet_address": wallet_address
     })
 
 if __name__ == '__main__':
