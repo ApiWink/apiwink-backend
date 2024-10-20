@@ -198,6 +198,14 @@ def get_service(service_id):
         object_id = ObjectId(service_id)
         service = db.Services.find_one({"_id": object_id})
         if service:
+            wallet_address = None
+            company_name = service.get('companyName')
+            user = db.User.find_one({"name": company_name})
+            if user:
+                wallet_address = user.get('wallet_address')
+                service["wallet_addr"] = wallet_address
+                # print("###")
+                # print(wallet_address)
             service['_id'] = str(service['_id'])  # Convert ObjectId to string
             return jsonify(service), 200
         else:
