@@ -1,3 +1,5 @@
+from bson import json_util
+import json
 from flask import Flask, request, jsonify
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -129,5 +131,26 @@ def update_requests():
     else:
         return jsonify({"success": False, "message": "API key not found"}), 404
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
+
+@app.route('/services', methods=['GET'])
+def get_services():
+    try:
+        collection = db['Services']
+        services = list(collection.find())
+
+        # Convert ObjectId to string for JSON serialization
+        for service in services:
+            service['_id'] = str(service['_id'])
+
+        return jsonify({
+            "success": True,
+            "data": json.loads(json_util.dumps(services))
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"An error occurred: {str(e)}"
+        }), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
