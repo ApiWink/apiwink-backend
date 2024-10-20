@@ -191,5 +191,19 @@ def get_client_service_details():
             "message": f"An error occurred: {str(e)}"
         }), 500
 
+
+@app.route('/service/<service_id>', methods=['GET'])
+def get_service(service_id):
+    try:
+        object_id = ObjectId(service_id)
+        service = db.Services.find_one({"_id": object_id})
+        if service:
+            service['_id'] = str(service['_id'])  # Convert ObjectId to string
+            return jsonify(service), 200
+        else:
+            return jsonify({"message": "Service not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
