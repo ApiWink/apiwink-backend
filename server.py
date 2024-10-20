@@ -205,5 +205,49 @@ def get_service(service_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/create_service', methods=['POST'])
+def create_service():
+    data = request.json
+    
+    # Extract data from the request
+    service_name = data.get('apiName')
+    company_name = data.get('developerName')
+    description = data.get('apiDescription')
+    tags = data.get('apiTags')
+    version = data.get('version')
+    response_preview = data.get('responsePreview')
+    price_pairs = data.get('pricePairs')
+
+    pricing = [{str(pair['calls']): str(pair['price'])} for pair in price_pairs]
+
+    service_object = {
+        "serviceName": service_name,
+        "companyName": company_name,
+        "description": description,
+        "tags": tags,
+        "pricing": pricing,
+        "responsePreview": response_preview,
+        "version": version
+    }
+
+    print("###")
+    print(service_object)
+
+    # Insert into Services collection
+    collection = db['Services']
+    result = collection.insert_one(service_object)
+
+    if result.acknowledged:
+        return jsonify({
+            "success": True,
+            "message": "Service created successfully",
+            "service_id": str(result.inserted_id)
+        })
+    return jsonify({
+        "success": False,
+        "message": "Failed to create service"
+    })
+
 if __name__ == '__main__':
     app.run()
