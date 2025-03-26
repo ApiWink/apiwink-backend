@@ -13,11 +13,11 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 load_dotenv()
 
-DB_USERNAME = os.getenv('DB_USERNAME')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-uri = f"mongodb+srv://{DB_USERNAME}:{DB_PASSWORD}@apiwink.rhat6.mongodb.net/?retryWrites=true&w=majority&appName=APIWink"
+DB_USERNAME = "jay"
+DB_PASSWORD = "jay"
+uri = f"mongodb+srv://{DB_USERNAME}:{DB_PASSWORD}@cluster0.zqzqy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 client = MongoClient(uri, server_api=ServerApi('1'))
-db = client['APIWink']
+db = client['playAI']
 
 @app.route('/add_key', methods=['POST'])
 def add_key():
